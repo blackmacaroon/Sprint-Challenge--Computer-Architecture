@@ -6,7 +6,12 @@ class CPU:
         self.register = [0] * 8       # makes a list for the 8 wires/registeres available
         self.PC = 0                   # program counter - think sing along 
         self.SPL = 7                  # stack pointer initialized 
-        self.flags = 0b00000000       # flags bits set to false
+        self.flags = {
+            "less_flag": 0,
+            "greater_flag": 0,
+            "equal_flag": 0
+            
+        }                             # flags bits set to false
 
 
     def load(self):
@@ -61,12 +66,12 @@ class CPU:
         elif op == "DIV":
             self.register[reg_a] /= self.register[reg_b]
         elif op == "CMP":  #compare flags bits: 0b00000LGE (less, greater, equal)
-            if reg_a < reg_b:
-                self.flags == 0b00000100
-            elif reg_a > reg_b:
-                self.flags == 0b00000010
-            elif reg_a == reg_b:
-                self.flags == 0b00000001
+            if self.register[reg_a] < self.register[reg_b]:
+                self.flags["less_flag"] = 1
+            elif self.register[reg_a] > self.register[reg_b]:
+                self.flags["greater_flag"] = 1
+            elif self.register[reg_a] == self.register[reg_b]:
+                self.flags["equal_flag"] = 1
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -93,79 +98,96 @@ class CPU:
             operandA = self.ram_read(self.PC + 1)   
             operandB = self.ram_read(self.PC + 2)
             if IR == LDI:
-                print("load", operandA)
+                # print("address", operandA)
+                # print("load", operandB)
                 self.ldi(operandA, operandB)
                 self.PC += 3
+                # print("pc", self.PC)
             elif IR == PRN:
                 self.prnt(operandA)
                 self.PC += 2
+                # print("pc", self.PC)
             elif IR == HLT:
-                print("halt")
+                # print("halt")
                 self.halt()
                 self.PC += 1
+                # print("pc", self.PC)
             elif IR == ADD:
                 self.alu("ADD", operandA, operandB)
                 self.PC += 3
-                print("add", operandA)
+                # print("pc", self.PC)
+                # print("add", operandA)
+                # print("add", operandB)
             elif IR == SUB:
                 self.alu("SUB", operandA, operandB)
                 self.PC += 3
+                # print("pc", self.PC)
             elif IR == MUL:
-                print("multiply", operandA)
+                # print("multiply", operandA)
+                # print("multiply", operandB)
                 self.alu("MUL", operandA, operandB)
                 self.PC += 3
+                # print("pc", self.PC)
             elif IR == DIV:
                 self.alu("DIV", operandA, operandB)
                 self.PC += 3
+                # print("pc", self.PC)
             elif IR == CMP:
-                print("compare", operandA)
+                # print("compare", operandA)
+                # print("compare", operandB)
                 self.alu("CMP", operandA, operandB)
                 self.PC += 3
+                # print("pc", self.PC)
             elif IR == POP:
-                print("pop", operandA)
+                # print("pop", operandA)
                 # copy the value from the address pointed to by the SP, to the given register
                 self.register[operandA] = self.ram[self.SPL]
                 # increment pointer location
                 self.SPL += 1
                 self.PC += 2
+                # print("pc", self.PC)
             elif IR == PUSH:
-                print("push", operandA)
+                # print("push", operandA)
                 self.SPL -= 1
                 self.ram[self.SPL] = self.register[operandA]
                 self.PC += 2
+                # print("pc", self.PC)
             elif IR == CALL:
-                print("call", operandA)
+                # print("call", operandA)
                 self.register[self.SPL] -= 1
                 self.ram[self.SPL] = self.PC +2
                 self.PC = self.register[operandA]
+                # print("pc", self.PC)
             elif IR == RET:
-                print("return")
+                # print("return")
                 self.PC = self.ram[self.SPL]
                 self.register[self.SPL] += 1
+                # print("pc", self.PC)
             elif IR == JMP:
-                print("jump", operandA)
+                # print("jump", operandA)
                 self.PC = self.register[operandA]
+                # print("pc", self.PC)
             # flags 00000LGE
             elif IR == JEQ:
-                print("jump equal", operandA)
+                # print("jump equal", operandA)
                 # If `equal` flag is set (true)
-                if self.flags == 0b00000001:
+                if self.flags["equal_flag"] == 1:
                     # jump to the address stored in the given register
                     self.PC = self.register[operandA]
                 #otherwise, skip to the next instruction PC += 2
                 else:
                     self.PC += 2
-                
+                # print("pc", self.PC)
             elif IR == JNE:
-                print("jump not equal", operandA)
+                # print("jump not equal", operandA)
                 # If `E` flag is clear (false, 0)
-                if ((self.flags == 0b00000001) == 0):
+                if self.flags["equal_flag"] == 0:
                     #jump to the address stored in the given register
                     self.PC = self.register[operandA]
                 # otherwise, skip to the next instruction PC += 2
                 else:
                     self.PC += 2
-
+                # print("pc", self.PC)
             else:
                 print(f"Wait, what? {IR}")
                 sys.exit(1)
