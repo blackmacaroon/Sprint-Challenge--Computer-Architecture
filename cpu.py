@@ -20,7 +20,7 @@ class CPU:
             with open(sys.argv[1]) as program:
                 for line in program:
                     if line[0] != "#" and line != "\n":
-                        self.ram[address] = int(line[:8], 2)  # convert to integer base-2
+                        self.ram[address] = int(line[:8], 2)  # convert to integer, list 0-8, base-2
                         address += 1
                 program.closed
         except ValueError:
@@ -45,10 +45,10 @@ class CPU:
     def ram_write(self, address, data):   # MAR = address, MDR = data at address
         self.ram[address] = data
 
-    def ldi(self, address, data):  # load
+    def ldi(self, address, data):
         self.register[address] = data
 
-    def prnt(self, address):   # print
+    def prnt(self, address):  
         print(self.register[address])
 
     def halt(self):
@@ -74,6 +74,7 @@ class CPU:
                 self.flags["equal_flag"] = 1
         else:
             raise Exception("Unsupported ALU operation")
+    #################################################################
 
     def run(self):
         """Run the CPU."""
@@ -98,96 +99,59 @@ class CPU:
             operandA = self.ram_read(self.PC + 1)   
             operandB = self.ram_read(self.PC + 2)
             if IR == LDI:
-                # print("address", operandA)
-                # print("load", operandB)
                 self.ldi(operandA, operandB)
                 self.PC += 3
-                # print("pc", self.PC)
             elif IR == PRN:
                 self.prnt(operandA)
                 self.PC += 2
-                # print("pc", self.PC)
             elif IR == HLT:
-                # print("halt")
                 self.halt()
                 self.PC += 1
-                # print("pc", self.PC)
             elif IR == ADD:
                 self.alu("ADD", operandA, operandB)
                 self.PC += 3
-                # print("pc", self.PC)
-                # print("add", operandA)
-                # print("add", operandB)
             elif IR == SUB:
                 self.alu("SUB", operandA, operandB)
                 self.PC += 3
-                # print("pc", self.PC)
             elif IR == MUL:
-                # print("multiply", operandA)
-                # print("multiply", operandB)
                 self.alu("MUL", operandA, operandB)
                 self.PC += 3
-                # print("pc", self.PC)
             elif IR == DIV:
                 self.alu("DIV", operandA, operandB)
                 self.PC += 3
-                # print("pc", self.PC)
             elif IR == CMP:
-                # print("compare", operandA)
-                # print("compare", operandB)
                 self.alu("CMP", operandA, operandB)
                 self.PC += 3
-                # print("pc", self.PC)
+                # print("flag", self.flags["equal_flag"])
             elif IR == POP:
-                # print("pop", operandA)
-                # copy the value from the address pointed to by the SP, to the given register
                 self.register[operandA] = self.ram[self.SPL]
-                # increment pointer location
                 self.SPL += 1
                 self.PC += 2
-                # print("pc", self.PC)
             elif IR == PUSH:
-                # print("push", operandA)
                 self.SPL -= 1
                 self.ram[self.SPL] = self.register[operandA]
                 self.PC += 2
-                # print("pc", self.PC)
             elif IR == CALL:
-                # print("call", operandA)
                 self.register[self.SPL] -= 1
                 self.ram[self.SPL] = self.PC +2
                 self.PC = self.register[operandA]
-                # print("pc", self.PC)
             elif IR == RET:
-                # print("return")
                 self.PC = self.ram[self.SPL]
                 self.register[self.SPL] += 1
-                # print("pc", self.PC)
             elif IR == JMP:
-                # print("jump", operandA)
                 self.PC = self.register[operandA]
-                # print("pc", self.PC)
-            # flags 00000LGE
             elif IR == JEQ:
-                # print("jump equal", operandA)
-                # If `equal` flag is set (true)
                 if self.flags["equal_flag"] == 1:
-                    # jump to the address stored in the given register
                     self.PC = self.register[operandA]
-                #otherwise, skip to the next instruction PC += 2
                 else:
                     self.PC += 2
-                # print("pc", self.PC)
+                # print("jump if equal")
             elif IR == JNE:
-                # print("jump not equal", operandA)
-                # If `E` flag is clear (false, 0)
                 if self.flags["equal_flag"] == 0:
-                    #jump to the address stored in the given register
                     self.PC = self.register[operandA]
-                # otherwise, skip to the next instruction PC += 2
                 else:
                     self.PC += 2
-                # print("pc", self.PC)
+                # print("jump if not equal")
             else:
                 print(f"Wait, what? {IR}")
                 sys.exit(1)
