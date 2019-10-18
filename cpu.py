@@ -37,8 +37,15 @@ class CPU:
     def ram_read(self, address):   # MAR = address in memory
         return self.ram[address]
 
-    def ram_write(self, data, address):   # MAR = address, MDR = data at address
+    def ram_write(self, address, data):   # MAR = address, MDR = data at address
         self.ram[address] = data
+
+    def ldi(self, address, data):  # load
+        self.register[address] = data
+
+    def prnt(self, address):   # print
+        print(self.register[address])
+
 
     # def handle_push(self, address): 
 
@@ -90,12 +97,10 @@ class CPU:
             operandA = self.ram_read(self.PC + 1)
             operandB = self.ram_read(self.PC + 2)
             if IR == LDI:
-                # operandA = self.ram_read(self.PC + 1)
-                # operandB = self.ram_read(self.PC + 2)
-                self.register[operandA] = operandB
+                self.ldi(operandA, operandB)
                 self.PC += 3
             elif IR == PRN:
-                print(self.register[operandA])
+                self.prnt(operandA)
                 self.PC += 2
             elif IR == HLT:
                 self.halt()
