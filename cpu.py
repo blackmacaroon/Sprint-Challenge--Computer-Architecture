@@ -43,6 +43,9 @@ class CPU:
     # def handle_push(self, address): 
 
     # def handle_pop(self, address):
+    def halt(self):
+        self.running = False
+        sys.exit()
 
     ############ Arithmetic Logic Unit  ###########################
     def alu(self, op, reg_a, reg_b):
@@ -95,8 +98,7 @@ class CPU:
                 print(self.register[operandA])
                 self.PC += 2
             elif IR == HLT:
-                running = False
-                self.PC += 1
+                self.halt()
             elif IR == ADD:
                 self.alu("ADD", operandA, operandB)
                 self.PC += 3
