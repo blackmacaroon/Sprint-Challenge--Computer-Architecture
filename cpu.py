@@ -6,7 +6,7 @@ class CPU:
         self.register = [0] * 8       # makes a list for the 8 wires/registeres available
         self.PC = 0                   # program counter - think sing along 
         self.SPL = 7                  # stack pointer initialized 
-        self.flags = 0b00000000
+        self.flags = 0b00000000       # flags bits set to false
 
 
     def load(self):
@@ -93,8 +93,8 @@ class CPU:
         JNE = 0b01010110
         running = True
         while running:
-            IR = self.ram[self.PC]
-            operandA = self.ram_read(self.PC + 1)
+            IR = self.ram[self.PC]    # instruction register
+            operandA = self.ram_read(self.PC + 1)   
             operandB = self.ram_read(self.PC + 2)
             if IR == LDI:
                 self.ldi(operandA, operandB)
